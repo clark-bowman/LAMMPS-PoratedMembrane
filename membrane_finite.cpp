@@ -43,8 +43,8 @@ int main()
         file_in >> v_dump_interval; // Dump visualization data every # steps
         file_in >> hole_radius; // Radius, in LJ units, of hole in center of membrane
         file_in >> fill_fluid; // Whether to fill hole with fluid (1) or not (0)
-        file_in >> finite_border;
-        file_in >> dump_tail_length;
+        file_in >> finite_border; // Minimum distance (LJ units) from simulation box to create lipids
+        file_in >> dump_tail_length; // Number of particles to dump per lipid tail (to reduce file size)
     }
 
     double inter_spacing = box_width / sqrt(double(target_lipids / 2));
