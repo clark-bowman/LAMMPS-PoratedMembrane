@@ -1,0 +1,86 @@
+# LAMMPS Script - Bilipid Membrane with Hole, DPD Fluid (clark_bowman@brown.edu)
+# LAMMPS version Aug. 10, 2015
+
+
+
+
+
+# SEC: This section initializes the simulation.
+
+# 	Define units, atom style, log path, and neighbor settings; read configuration data for the membrane.
+# 	Final line communicates ghost data and is necessary for DPD parallelizing. On some versions of LAMMPS, use instead `communicate single vel yes'
+
+units lj
+atom_style molecular
+log membrane.log
+read_data membrane_finite.dat
+neighbor 0.3 bin
+neigh_modify delay 3
+comm_modify vel yes
+
+# 	Define bond, angle, pairwise interactions.
+# 	For pairwise interactions: type 1 is lipid head, 2 is lipid tail, 3 is water.
+#   43872 is a temperature seed; change for different randomness.
+
+bond_style harmonic
+bond_coeff 1 64 0.5
+angle_style cosine/delta
+angle_coeff 1 20 180.0
+dihedral_style none
+
+pair_style dpd 1 1.0 43872
+pair_coeff * * 25.0 4.5 1.0
+pair_coeff 1 3 35.0 4.5 1.0
+pair_coeff 2 3 75.0 20.0 1.0
+pair_coeff 3 4 75.0 20.0 1.0
+pair_coeff 1 2 50.0 9.0 1.0
+pair_coeff 1 4 50.0 9.0 1.0
+pair_coeff 2 2 15.0 4.5 1.0
+pair_coeff 4 4 15.0 4.5 1.0
+pair_coeff 2 4 15.0 4.5 1.0
+
+# SEC: This section initializes the geometry.
+
+#   Define safe regions where fluid may be placed. This is the union of two regions outside the membrane.
+# 	The simulation box is 40 x 144 x 144.
+
+region safe1 block 16.5 23.5 0 144 0 144 units box side out
+region safe2 cylinder x 72 72 9.5 1 39 units box
+region safe union 2 safe1 safe2
+lattice fcc 3
+create_atoms 3 region safe
+
+# SEC: This section defines LAMMPS groups and computes that will be used in the simulation.
+
+# 	Groups are named indicatively of their membership.
+# 	Computes include the x, y, and z positions of the center of mass of the membrane.
+
+group fluid type 3
+group membrane type 1 4
+
+# SEC: This section initializes the particle velocities.
+
+velocity all create 1 21456
+
+# SEC: This section defines fixes to impose forces in the simulation.
+
+# 	NVE integration, with limit for initialization.
+
+fix 1 all nve/limit 0.05
+
+# SEC: This section runs the simulation.
+
+# 	Simulation timestep (LJ time units).
+timestep 0.01
+
+# 	How often to output thermo data and first run phase.
+thermo 1000
+run 100
+
+# 	Dump 1 is a fluid-less simulation dump at the specified interval.
+
+dump 1 membrane atom 5000 membrane_finite.lammpstrj
+dump_modify 1 first yes
+
+# 	Run data-collecting simulation.
+run 5000000
