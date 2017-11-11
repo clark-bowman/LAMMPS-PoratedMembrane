@@ -14,3 +14,6 @@ _Outputs_:
 
 ## membrane_finite.dat
 [Data file](http://lammps.sandia.gov/doc/read_data.html) which stores the initial positions of the lipids in a bilayer membrane. Includes positions, bonds, and angles.
+
+## membrane_analysis.m
+Matlab script for image analysis. Reads bitmap files rendered by VMD's frame export. Used for computing radius of pores (front view) and membrane widths (side view).
