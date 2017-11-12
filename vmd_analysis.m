@@ -52,10 +52,10 @@ for i = 1:20
     % Loop over rows and save instantaneous width...
     width(i) = 9999;
     for j = 2:1202
-        tempoi = find(C(j,2:1202));
-        boxx = max(tempoi) - min(tempoi);
-        if boxx < width(i)
-            width(i) = boxx;
+        ind = find(C(j,2:1202));
+        w = max(ind) - min(ind);
+        if w < width(i)
+            width(i) = w;
         end
     end
 end
